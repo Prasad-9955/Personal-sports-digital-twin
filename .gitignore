@@ -1,0 +1,55 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+ENV/
+.venv/
+
+# Environment & Secrets
+.env
+*.env.local
+*.pem
+*.key
+
+# Video & Media storage
+backend/uploads/
+uploads/
+*.mp4
+*.mov
+*.avi
+
+# Database / SQLite
+*.sqlite3
+*.db
+
+# Node / React
+node_modules/
+web/node_modules/
+dist/
+web/dist/
+.vite/
+
+# Flutter / Dart
+.dart_tool/
+.flutter-plugins
+.flutter-plugins-dependencies
+.packages
+build/
+*.apk
+*.aab
+
+# Testing & Coverage
+.pytest_cache/
+.coverage
+htmlcov/
+
+# IDE / OS
+.idea/
+.vscode/
+*.swp
+Thumbs.db
+[Dd]esktop.ini

@@ -1,0 +1,15 @@
+__pycache__
+*.pyc
+*.pyo
+*.pyd
+.Python
+env/
+venv/
+.venv/
+.pytest_cache/
+.coverage
+htmlcov/
+uploads/*.mp4
+uploads/*.mov
+uploads/*.avi
+.env
