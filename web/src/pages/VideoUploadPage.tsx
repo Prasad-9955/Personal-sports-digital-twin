@@ -189,7 +189,7 @@ export const VideoUploadPage: React.FC = () => {
         <input
           ref={fileInputRef}
           type="file"
-          accept="video/mp4,video/quicktime,video/x-msvideo,.mp4,.mov,.avi"
+          accept="video/mp4,video/quicktime,video/x-msvideo,video/*,.mp4,.mov,.avi"
           className="hidden"
           onChange={(e) => {
             if (e.target.files && e.target.files[0]) {

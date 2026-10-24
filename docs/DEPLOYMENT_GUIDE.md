@@ -1,207 +1,241 @@
-# PERSONAL SPORTS DIGITAL TWIN — PRODUCTION CLOUD DEPLOYMENT GUIDE
+# PERSONAL SPORTS DIGITAL TWIN — ZERO-BUDGET (₹0) PRODUCTION DEPLOYMENT GUIDE
 
-**Target Architecture**:
-- **Backend & Database**: Render Cloud PaaS (Managed PostgreSQL + Dockerized FastAPI)
-- **Frontend**: Vercel (Edge CDN, Automated SSL & SPA Routing)
-- **Alternative**: Docker Compose (Local / Single-Server VPS)
+**Project**: Personal Sports Digital Twin for Longitudinal Biomechanical and Performance Trend Analysis  
+**Repository**: [https://github.com/Prasad-9955/Personal-sports-digital-twin](https://github.com/Prasad-9955/Personal-sports-digital-twin)  
+**Target Duration**: 2+ Months Accessibility  
+**Budget Constraint**: Exactly ₹0 (Zero Credit Card, Debit Card, or Billing Account Required)
 
 ---
 
-## ARCHITECTURE OVERVIEW
+## 1. SELECTED PRODUCTION ARCHITECTURE & RATIONALE
 
 ```
-  ┌────────────────────────────────────────────────────────┐
-  │                 Vercel Global Edge CDN                 │
-  │     https://your-sports-twin.vercel.app (React 19)     │
-  └───────────────────────────┬────────────────────────────┘
-                              │
-              REST API Calls (HTTPS / Bearer JWT)
-                              │
-  ┌───────────────────────────▼────────────────────────────┐
-  │                   Render Cloud PaaS                    │
-  │   https://sports-twin-backend.onrender.com (FastAPI)   │
-  │   - OpenCV & MediaPipe BlazePose Video Engine          │
-  │   - Nonparametric Baselines & OLS Kinematic Trends     │
-  │   - Statistical Deviation & Twin State Synthesizer     │
-  └───────────────────────────┬────────────────────────────┘
-                              │
-             Private Internal TCP Connection
-                              │
-  ┌───────────────────────────▼────────────────────────────┐
-  │               Render Managed PostgreSQL                │
-  │            sports-twin-db (Persistent ACID)            │
-  └────────────────────────────────────────────────────────┘
+┌────────────────────────────────────────────────────────────────────────┐
+│                      Cloudflare Pages (Global CDN)                     │
+│               https://sports-twin.pages.dev (React 19)                 │
+│               - 100% Free Forever, Zero Payment Card Required          │
+│               - 24/7 Global Uptime, Automated SSL Encryption           │
+│               - Single Page Application (SPA) Client Routing           │
+└───────────────────────────────────┬────────────────────────────────────┘
+                                    │
+                  HTTPS API Requests (Bearer JWT Auth)
+                                    │
+┌───────────────────────────────────▼────────────────────────────────────┐
+│                    Cloudflare Secure HTTP/2 Tunnel                     │
+│           https://<your-tunnel-subdomain>.trycloudflare.com            │
+│           - Connects Public Internet to Local Backend Over TCP 443     │
+│           - Bypasses Carrier NAT & Mobile UDP Blocks (Jio / Airtel)    │
+└───────────────────────────────────┬────────────────────────────────────┘
+                                    │
+┌───────────────────────────────────▼────────────────────────────────────┐
+│                  User-Owned Host Machine (Windows 11)                  │
+│                                                                        │
+│  FastAPI Backend (Port 8000)        PostgreSQL Database (Port 5432)   │
+│  - OpenCV Video Processing          - 44 Persistent Completed Sessions │
+│  - MediaPipe BlazePose (33 LMs)     - 20 Sequential Twin States (v20)  │
+│  - Nonparametric Baselines (IQR)    - Personal Baselines & Anomaly MAD │
+│  - OLS Trajectory Linear Regress.   - 100% Data Preservation, Zero RAM │
+│  - Resilient Gemini AI Fallback       or Processing Quota Restrictions │
+└────────────────────────────────────────────────────────────────────────┘
+```
+
+### Why This Architecture Was Selected:
+1. **Zero Financial or Card Requirement**: Cloudflare Pages requires **no credit card, no debit card, and no billing verification**.
+2. **Heavy Computer Vision Compatibility**: MediaPipe BlazePose and OpenCV require substantial RAM and CPU for per-frame 3D landmark extraction. Free cloud hosts (e.g. 512MB RAM limits) routinely trigger Out-Of-Memory (OOM) crashes during video processing. Your local host provides unconstrained CPU and memory.
+3. **Data Preservation**: All 44 existing completed sessions and `v20` twin state records remain completely safe in PostgreSQL without risk of cloud trial expiration or ephemeral disk wipes.
+4. **Mobile Usability**: Cloudflare edge routing with HTTP/2 ensures seamless access on Android smartphones, iPhones, tablets, laptops, and desktops.
+
+---
+
+## 2. PROVIDER SIGNUP & REGISTRATION
+
+### Cloudflare Pages (Frontend Hosting — Free Forever)
+- **Signup Link**: [https://dash.cloudflare.com/sign-up](https://dash.cloudflare.com/sign-up)
+- **Verification**: Standard email signup or 1-click Google OAuth. **No credit or debit card is ever requested.**
+
+---
+
+## 3. EXACT CLOUDFLARE PAGES DASHBOARD SETTINGS
+
+1. Log in to your **[Cloudflare Dashboard](https://dash.cloudflare.com/)**.
+2. In the left navigation menu, navigate to **Workers & Pages**.
+3. Click the **Create application** button $\to$ select the **Pages** tab.
+4. Click **Connect to Git** and authorize your GitHub account (`Prasad-9955`).
+5. Select your repository: **`Prasad-9955/Personal-sports-digital-twin`** $\to$ click **Begin setup**.
+6. Enter the exact configuration settings below:
+
+| Field | Configuration Value | Notes |
+| :--- | :--- | :--- |
+| **Project name** | `personal-sports-digital-twin` | Customizes your URL: `personal-sports-digital-twin.pages.dev` |
+| **Production branch** | `main` | Deploys automatically on git pushes |
+| **Framework preset** | `Vite` | Configures standard Vite toolchain |
+| **Root directory** | `web` | **Crucial**: Points to the React frontend folder |
+| **Build command** | `npm run build` | Runs TypeScript compilation & Vite bundle |
+| **Build output directory** | `dist` | Target directory containing HTML/JS assets |
+
+7. **Environment Variables**:
+   - Click **Add variable**:
+     - **Variable name**: `VITE_API_BASE_URL`
+     - **Value**: `https://<your-active-tunnel>.trycloudflare.com` *(Your active Cloudflare Tunnel backend URL, with no trailing slash)*
+8. Click **Save and Deploy**.
+   *(Deployment takes approximately 45–60 seconds).*
+
+---
+
+## 4. LOCAL BACKEND & DATABASE STARTUP COMMANDS
+
+To make your backend available to your public Cloudflare Pages website, execute these two commands on your computer:
+
+### Step 1: Start PostgreSQL & FastAPI Backend
+Open a terminal (PowerShell or Command Prompt) in `c:\Users\manda\Desktop\mini`:
+```powershell
+python -m uvicorn app.main:app --app-dir backend --host 0.0.0.0 --port 8000
+```
+*Verify output: `INFO: Uvicorn running on http://0.0.0.0:8000`.*
+
+### Step 2: Start Cloudflare Tunnel
+Open a second terminal in `c:\Users\manda\Desktop\mini`:
+```powershell
+# For exposing the full unified web application + backend proxy on port 5173:
+.\cloudflared.exe tunnel --edge-ip-version 4 --protocol http2 --url http://localhost:5173
+
+# Or for exposing backend API alone on port 8000 (when using Cloudflare Pages frontend):
+.\cloudflared.exe tunnel --edge-ip-version 4 --protocol http2 --url http://localhost:8000
+```
+*Note: `--edge-ip-version 4 --protocol http2` ensures compatibility with Indian mobile operators (Jio / Airtel) by avoiding cellular UDP/IPv6 drops.*
+*Look for the output line: `https://<random-subdomain>.trycloudflare.com`.*
+
+---
+
+## 5. REQUIRED ENVIRONMENT VARIABLES REFERENCE
+
+Create a local `backend/.env` file with these values (all sensitive tokens are stored locally, never exposed to git):
+
+```bash
+# Database Configuration (Local PostgreSQL)
+DATABASE_URL=postgresql://postgres:postgres@localhost:5432/sports_twin
+
+# Security / Authentication
+JWT_SECRET=personal_sports_digital_twin_academic_production_secret_2026
+JWT_ALGORITHM=HS256
+ACCESS_TOKEN_EXPIRE_MINUTES=1440
+
+# File Upload Guardrails
+UPLOAD_DIR=./uploads
+MAX_UPLOAD_SIZE_MB=100
+ALLOWED_EXTENSIONS=mp4,mov,avi
+
+# Gemini AI (Optional - Factual deterministic fallback is active if omitted)
+GEMINI_MODEL=gemini-2.5-flash
+GEMINI_API_KEY=
+
+# Server Configuration
+ENVIRONMENT=production
+LOG_LEVEL=INFO
 ```
 
 ---
 
-## PHASE 1: PUSH YOUR CODE TO GITHUB
+## 6. DEPLOYING FRONTEND UPDATES FROM GITHUB
 
-Both Render and Vercel automatically deploy from your GitHub repository.
-
-1. **Open a terminal in your project root** (`c:\Users\manda\Desktop\mini`).
-2. **Commit all project files**:
+Whenever you modify code or components in `web/`:
+1. Commit and push your changes:
    ```powershell
-   git add .
-   git commit -m "feat: complete Personal Sports Digital Twin with cloud deployment configurations"
+   git add web/
+   git commit -m "feat: enhance mobile responsive layout"
+   git push origin main
    ```
-3. **Create a new repository on GitHub**:
-   - Go to [https://github.com/new](https://github.com/new).
-   - Name your repository (e.g., `personal-sports-digital-twin`).
-   - Set visibility to **Public** or **Private**.
-   - Do **NOT** initialize with a README, .gitignore, or license (we already created them).
-   - Click **Create repository**.
-4. **Push your code to GitHub**:
+2. Cloudflare Pages automatically detects the push, rebuilds the frontend in ~45 seconds, and updates your live URL with zero downtime.
+
+---
+
+## 7. HOW TO RESTART BACKEND & TUNNEL
+
+If your computer restarts or enters sleep mode:
+1. Ensure the PostgreSQL service is running (`net start postgresql-x64-16` or open Services).
+2. Start the FastAPI backend:
    ```powershell
-   git remote add origin https://github.com/YOUR_GITHUB_USERNAME/personal-sports-digital-twin.git
-   git branch -M main
-   git push -u origin main
+   python -m uvicorn app.main:app --app-dir backend --host 0.0.0.0 --port 8000
    ```
+3. Start the tunnel:
+   ```powershell
+   .\cloudflared.exe tunnel --edge-ip-version 4 --protocol http2 --url http://localhost:5173
+   ```
+4. If the tunnel generates a new URL, update `VITE_API_BASE_URL` in Cloudflare Pages dashboard under **Settings** $\to$ **Environment Variables** $\to$ **Retry deployment**.
 
 ---
 
-## PHASE 2: DEPLOY DATABASE & BACKEND ON RENDER
+## 8. MOBILE TESTING INSTRUCTIONS (ANDROID & IPHONE)
 
-Render offers free managed PostgreSQL databases and free Web Services. We have included a **Render Blueprint** (`render.yaml`) for 1-click provisioning.
-
-### Method A: One-Click Blueprint Deployment (Recommended)
-
-1. Sign up or log in to **[Render.com](https://render.com/)**.
-2. From the dashboard, click the **New +** button in the top navigation bar.
-3. Select **Blueprint**.
-4. Connect your GitHub account and select your repository: `personal-sports-digital-twin`.
-5. Render will automatically read `render.yaml` and show:
-   - **Database**: `sports-twin-db` (PostgreSQL)
-   - **Web Service**: `sports-twin-backend` (Dockerized FastAPI)
-6. Click **Apply**.
-7. Render will provision the database and build the Docker container. This takes approximately 3–5 minutes on first build because it compiles the OpenCV and MediaPipe Linux libraries.
-8. Once the build finishes, you will see a green **"Live"** badge and your public backend URL:
-   ```
-   https://sports-twin-backend-xxxx.onrender.com
-   ```
-   *(Save this URL for Phase 3!)*
-
-### Method B: Manual Render Deployment (Alternative)
-
-If you prefer to configure services manually without blueprints:
-
-1. **Create PostgreSQL Database**:
-   - In Render, click **New +** $\to$ **PostgreSQL**.
-   - Name: `sports-twin-db`
-   - Database Name: `sports_twin`
-   - User: `postgres`
-   - Plan: **Free**
-   - Click **Create Database**.
-   - Copy the **Internal Database URL** (e.g., `postgres://postgres:...@.../sports_twin`).
-
-2. **Create FastAPI Web Service**:
-   - Click **New +** $\to$ **Web Service**.
-   - Select your GitHub repository.
-   - Name: `sports-twin-backend`
-   - Root Directory: `backend`
-   - Runtime: **Docker** (Render will use `backend/Dockerfile`)
-   - Plan: **Free**
-   - Add Environment Variables:
-     | Key | Value |
-     | :--- | :--- |
-     | `DATABASE_URL` | *(Paste Internal Database URL from step 1)* |
-     | `JWT_SECRET` | *(Generate a random 32+ character string)* |
-     | `JWT_ALGORITHM` | `HS256` |
-     | `ACCESS_TOKEN_EXPIRE_MINUTES` | `1440` |
-     | `ENVIRONMENT` | `production` |
-     | `GEMINI_MODEL` | `gemini-2.5-flash` |
-     | `GEMINI_API_KEY` | *(Your Gemini API key, or leave blank for deterministic fallback)* |
-   - Click **Create Web Service**.
-
-3. **Verify Backend Health**:
-   - Once deployed, visit: `https://sports-twin-backend-xxxx.onrender.com/health`
-   - Expected response:
-     ```json
-     {
-       "status": "HEALTHY",
-       "database_connected": true,
-       "environment": "production",
-       "gemini_api_configured": true
-     }
-     ```
-   - Interactive Swagger API docs are available at `https://sports-twin-backend-xxxx.onrender.com/docs`.
-
----
-
-## PHASE 3: DEPLOY FRONTEND ON VERCEL
-
-Vercel provides instant global deployment and automated SSL certificates for React applications.
-
-1. Sign up or log in to **[Vercel.com](https://vercel.com/)** using your GitHub account.
-2. In the Vercel dashboard, click **Add New...** $\to$ **Project**.
-3. Import your GitHub repository: `personal-sports-digital-twin`.
-4. Configure the project settings:
-   - **Project Name**: `personal-sports-digital-twin` (or any custom name)
-   - **Framework Preset**: `Vite` (Vercel automatically detects Vite)
-   - **Root Directory**: Click **Edit** and choose `web`
-   - **Build Command**: `npm run build`
-   - **Output Directory**: `dist`
-5. **Add Environment Variable**:
-   - Expand the **Environment Variables** accordion.
-   - Add the following variable:
-     - **Key**: `VITE_API_BASE_URL`
-     - **Value**: `https://sports-twin-backend-xxxx.onrender.com` *(Use your exact Render backend URL from Phase 2, with NO trailing slash)*
-6. Click **Deploy**.
-7. Vercel will build and deploy the React application in about 45 seconds.
-8. Click **Visit** or open your new live production URL:
-   ```
-   https://personal-sports-digital-twin-xxxx.vercel.app
-   ```
-
----
-
-## PHASE 4: VERIFY END-TO-END PRODUCTION SYSTEM
-
-1. **Access Web Application**:
-   - Open your Vercel URL in your browser.
-2. **Register a New Athlete**:
-   - Click **Sign Up**.
-   - Register an athlete profile (Name: *"Championship Sprinter"*, Sport: *"Track & Field"*).
-3. **Verify Baseline Calibration State**:
-   - Navigate to the **Digital Twin** view.
-   - Confirm baseline message: *"No sessions recorded yet. Upload your first movement video to initiate your Digital Twin."*
-4. **Seed Demonstration Data or Upload Real Video**:
-   - Click **Upload Video** to upload an athletic movement MP4/MOV clip, or trigger the `/api/v1/demo/seed` endpoint via Swagger docs to populate 5 longitudinal sessions.
+1. Open Chrome (Android) or Safari (iPhone).
+2. Enter your Cloudflare Pages URL: `https://personal-sports-digital-twin.pages.dev`.
+3. **Verify Layout & Touch Target Responsiveness**:
+   - Sticky top bar shows active health pulse badge.
+   - Hamburger drawer opens smoothly with large touch targets.
+   - Tap **Sign In** and enter demo credentials:
+     - **Email**: `demo_user@example.com`
+     - **Password**: `Password123!`
+4. **Test Video Capture**:
+   - Navigate to **Analyze Video**.
+   - Tap the upload dropzone $\to$ mobile camera prompts: *"Take Video"* or *"Photo Library"*.
+   - Record or select a 3–10 second video clip of running gait $\to$ observe upload progress and BlazePose pipeline steps.
 5. **Inspect Live Twin Progression**:
-   - Confirm state machine version increment ($v_1 \to v_2 \dots$).
-   - Check the **Bilateral Knee Symmetry Radar**.
-   - Check **Kinematic Regression Trends** and **AI Biomechanical Drill Prescriptions**.
+   - View updated **State Version**, **Bilateral Radar Plot**, and **Kinematic Trends** reflowing seamlessly without horizontal overflow.
 
 ---
 
-## ALTERNATIVE: SINGLE-COMMAND LOCAL / VPS DOCKER DEPLOYMENT
+## 9. DATABASE BACKUP & DISASTER RECOVERY
 
-If you want to run the full stack (PostgreSQL + FastAPI + React/Nginx) in Docker containers locally or on a cloud VM (AWS EC2, DigitalOcean Droplet, Linode):
+To ensure your 44 sessions, baselines, and twin states are permanently preserved:
 
-1. **Run Docker Compose**:
-   ```powershell
-   docker compose up --build -d
-   ```
-2. **Access Services**:
-   - Web Application: [http://localhost:3000](http://localhost:3000)
-   - Backend API Docs: [http://localhost:8000/docs](http://localhost:8000/docs)
-   - PostgreSQL Database: `localhost:5432` (`sports_twin`)
-3. **Stop Services**:
-   ```powershell
-   docker compose down
-   ```
+### Backup Command (Export SQL Dump):
+```powershell
+pg_dump -U postgres -d sports_twin -F c -b -v -f "c:\Users\manda\Desktop\mini\sports_twin_backup_$(Get-Date -Format 'yyyyMMdd').dump"
+```
+
+### Restore Command (Import SQL Dump):
+```powershell
+pg_restore -U postgres -d sports_twin -v "c:\Users\manda\Desktop\mini\sports_twin_backup_20261024.dump"
+```
 
 ---
 
-## PRODUCTION ENVIRONMENT VARIABLES REFERENCE
+## 10. FREE-TIER RESTRICTIONS & AVAILABILITY LIMITATIONS
 
-| Variable | Target Service | Purpose | Example |
-| :--- | :--- | :--- | :--- |
-| `DATABASE_URL` | Backend | PostgreSQL connection string | `postgresql://user:pass@host:5432/sports_twin` |
-| `JWT_SECRET` | Backend | Cryptographic secret for signing tokens | `super_secret_production_key_32_chars` |
-| `JWT_ALGORITHM` | Backend | JWT signing algorithm | `HS256` |
-| `ACCESS_TOKEN_EXPIRE_MINUTES` | Backend | Token validity window | `1440` (24 hours) |
-| `ENVIRONMENT` | Backend | Operational environment mode | `production` |
-| `GEMINI_MODEL` | Backend | Target Gemini AI model | `gemini-2.5-flash` |
-| `GEMINI_API_KEY` | Backend | Google GenAI API key | `AIzaSy...` (optional, fallback activates if omitted) |
-| `VITE_API_BASE_URL` | Frontend | Target backend API root | `https://sports-twin-backend.onrender.com` |
+| Limitation | Impact | Mitigation Strategy |
+| :--- | :--- | :--- |
+| **Host Computer Dependency** | If laptop sleeps or Wi-Fi drops, backend API calls fail. | Set Windows power plan to *"Never sleep when plugged in"* during presentation or evaluation days. |
+| **Temporary Subdomain Fluctuation** | Free `trycloudflare.com` quick tunnels generate a new subdomain upon process restart. | Update `VITE_API_BASE_URL` in Cloudflare Pages, or register a free domain via Cloudflare Zero Trust (also 100% free). |
+| **Cloudflare Pages Build Limits** | 500 builds per month on free tier. | Only push tested commits to `main`; preview builds locally before pushing. |
+| **Local Upload Disk Space** | Uploaded video files accumulate in `backend/uploads/`. | Periodically delete processed raw video clips older than 30 days while preserving extracted metric rows in PostgreSQL. |
+
+---
+
+## 11. TROUBLESHOOTING GUIDE
+
+### 1. CORS Preflight Failures (`Cross-Origin Request Blocked`)
+- **Cause**: Backend rejects origin.
+- **Fix**: Verified `app.add_middleware(CORSMiddleware, allow_origin_regex=r"https?://.*", allow_credentials=True)` is present in `backend/app/main.py`.
+
+### 2. Database Connection Denied (`Port 5432 failed: 10013`)
+- **Cause**: Windows sandbox TCP restriction or PostgreSQL service stopped.
+- **Fix**: Run backend commands outside sandbox (`BypassSandbox: true`), or run `net start postgresql-x64-16` in Administrator command prompt.
+
+### 3. Mobile Network Error on Cellular Data (Jio / Airtel)
+- **Cause**: Carrier network firewalls drop UDP packets on non-standard ports.
+- **Fix**: Launch tunnel strictly with `--protocol http2`. This forces outbound communication over TCP port 443 (standard HTTPS).
+
+### 4. Video Processing Failures (`Insufficient landmark quality`)
+- **Cause**: Lighting too dim, camera shaking excessively, or runner partially cropped.
+- **Fix**: Follow in-app guidelines (sagittal lateral angle, 3–15 seconds, full body visible from head to toe).
+
+---
+
+## 12. STRATEGY FOR KEEPING THE PROJECT ACCESSIBLE FOR 2+ MONTHS
+
+To ensure uninterrupted demonstration capability throughout the next 60+ days without paying any fees:
+1. **Frontend Always Live**: Cloudflare Pages serves the static React application 24/7/365 without sleep cycles or monthly expiration.
+2. **Scheduled Demonstration Mode**:
+   - When presenting to evaluators, guides, or interviewers, boot the laptop, start Uvicorn and Cloudflare Tunnel, and ensure the active tunnel URL is configured in Cloudflare Pages.
+   - For offline evaluation, reviewers can inspect the full architecture, code, test suites, and documentation directly on GitHub.
+3. **Weekly Health Check**: Run `curl -s https://<tunnel-url>/health` once a week to confirm PostgreSQL and FastAPI connectivity.
