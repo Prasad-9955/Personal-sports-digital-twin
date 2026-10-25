@@ -5,16 +5,27 @@ from app.config import settings
 
 logger = logging.getLogger(__name__)
 
-# Ensure correct driver prefix for PostgreSQL if needed
-db_url = settings.DATABASE_URL
-if db_url.startswith("postgres://"):
-    db_url = db_url.replace("postgres://", "postgresql://", 1)
+# Ensure correct driver prefix for PostgreSQL or fallback to SQLite if unconfigured
+raw_url = (settings.DATABASE_URL or "").strip()
+if not raw_url or raw_url == "postgresql://postgres:postgres@localhost:5432/sports_twin":
+    # If in cloud production and no external database URL is supplied, fallback safely
+    if settings.ENVIRONMENT == "production":
+        logger.warning("DATABASE_URL not configured in production environment. Using safe local sqlite fallback.")
+        db_url = "sqlite:///./sports_twin_fallback.db"
+    else:
+        db_url = raw_url or "sqlite:///./sports_twin_dev.db"
+elif raw_url.startswith("postgres://"):
+    db_url = raw_url.replace("postgres://", "postgresql://", 1)
+else:
+    db_url = raw_url
+
+connect_args = {"check_same_thread": False} if db_url.startswith("sqlite") else {}
 
 engine = create_engine(
     db_url,
     pool_pre_ping=True,
-    pool_size=10,
-    max_overflow=20,
+    connect_args=connect_args,
+    **({} if db_url.startswith("sqlite") else {"pool_size": 10, "max_overflow": 20}),
     echo=(settings.ENVIRONMENT == "debug"),
 )
 

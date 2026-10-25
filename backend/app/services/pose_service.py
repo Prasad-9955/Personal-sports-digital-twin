@@ -29,6 +29,12 @@ class PoseService:
     def __init__(self):
         base_dir = Path(__file__).resolve().parent.parent
         self.model_path = base_dir / "models_assets" / "pose_landmarker_lite.task"
+        self._landmarker = None
+
+    def _get_landmarker(self):
+        if self._landmarker is not None:
+            return self._landmarker
+
         if not self.model_path.exists():
             raise FileNotFoundError(f"Pose landmarker model not found at {self.model_path}")
 
@@ -39,13 +45,15 @@ class PoseService:
             min_tracking_confidence=0.5,
             num_poses=1
         )
-        self.landmarker = vision.PoseLandmarker.create_from_options(options)
+        self._landmarker = vision.PoseLandmarker.create_from_options(options)
+        return self._landmarker
 
     def extract_landmarks_from_video(self, video_path: str, sample_rate: int = 1) -> Dict[str, Any]:
         """
         Processes video frames with MediaPipe BlazePose.
         Extracts 33 landmarks and computes landmark quality scores.
         """
+        landmarker = self._get_landmarker()
         cap = cv2.VideoCapture(video_path)
         if not cap.isOpened():
             raise ValueError(f"Unable to open video at {video_path}")
@@ -69,7 +77,7 @@ class PoseService:
                 mp_image = mp.Image(image_format=mp.ImageFormat.SRGB, data=rgb_frame)
 
                 try:
-                    detection_result = self.landmarker.detect(mp_image)
+                    detection_result = landmarker.detect(mp_image)
                     if detection_result.pose_landmarks and len(detection_result.pose_landmarks) > 0:
                         landmarks = detection_result.pose_landmarks[0]
                         
