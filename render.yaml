@@ -26,6 +26,19 @@ services:
       - key: GEMINI_API_KEY
         sync: false
 
+  # React Frontend Static Site
+  - type: web
+    name: sports-twin-web
+    runtime: static
+    rootDir: web
+    buildCommand: npm install && npm run build
+    staticPublishPath: dist
+    plan: free
+    routes:
+      - type: rewrite
+        source: /*
+        destination: /index.html
+
 databases:
   # Managed PostgreSQL Database
   - name: sports-twin-db
