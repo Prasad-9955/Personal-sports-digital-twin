@@ -14,20 +14,29 @@ if not raw_url or raw_url == "postgresql://postgres:postgres@localhost:5432/spor
         db_url = "sqlite:///./sports_twin_fallback.db"
     else:
         db_url = raw_url or "sqlite:///./sports_twin_dev.db"
-elif raw_url.startswith("postgres://"):
-    db_url = raw_url.replace("postgres://", "postgresql://", 1)
 else:
     db_url = raw_url
 
+# Standardize postgres dialect prefix to explicitly use psycopg2
+if db_url.startswith("postgres://"):
+    db_url = db_url.replace("postgres://", "postgresql+psycopg2://", 1)
+elif db_url.startswith("postgresql://"):
+    db_url = db_url.replace("postgresql://", "postgresql+psycopg2://", 1)
+
 connect_args = {"check_same_thread": False} if db_url.startswith("sqlite") else {}
 
-engine = create_engine(
-    db_url,
-    pool_pre_ping=True,
-    connect_args=connect_args,
-    **({} if db_url.startswith("sqlite") else {"pool_size": 10, "max_overflow": 20}),
-    echo=(settings.ENVIRONMENT == "debug"),
-)
+try:
+    engine = create_engine(
+        db_url,
+        pool_pre_ping=True,
+        connect_args=connect_args,
+        **({} if db_url.startswith("sqlite") else {"pool_size": 10, "max_overflow": 20}),
+        echo=(settings.ENVIRONMENT == "debug"),
+    )
+except Exception as e:
+    logger.error(f"Failed to initialize database engine for {db_url}: {e}. Falling back to SQLite.")
+    db_url = "sqlite:///./sports_twin_emergency.db"
+    engine = create_engine(db_url, connect_args={"check_same_thread": False})
 
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
