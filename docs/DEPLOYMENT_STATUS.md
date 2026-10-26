@@ -1,7 +1,7 @@
 # PERSONAL SPORTS DIGITAL TWIN — DEPLOYMENT STATUS REPORT
 
 **Document ID**: `docs/DEPLOYMENT_STATUS.md`  
-**Last Successful Verification Date**: October 24, 2026, 13:08 IST  
+**Last Successful Verification Date**: October 26, 2026, 10:15 IST  
 **System Target**: Public, Mobile-Friendly, Zero-Budget (₹0) Production Deployment
 
 ---
@@ -10,11 +10,11 @@
 
 | Service Component | Operational Status | URL / Endpoint | Verification Notes |
 | :--- | :--- | :--- | :--- |
-| **Public HTTPS Web Endpoint** | **ONLINE (LIVE)** | `https://weblogs-processors-thermal-tail.trycloudflare.com` | Served via Cloudflare HTTP/2 IPv4 TCP tunnel; verified accessible on Android/iPhone/Desktop with zero network errors. |
+| **Public HTTPS Web Endpoint** | **ONLINE (LIVE)** | `https://produced-formed-before-lopez.trycloudflare.com` | Served via Cloudflare HTTP/2 IPv4 TCP tunnel; verified accessible on Android/iPhone/Desktop with zero network errors. |
 | **Local Frontend Endpoint** | **ONLINE** | `http://localhost:5173` | React 19 + Tailwind v4 + Vite with reverse proxy to backend `/api` and `/uploads`. |
-| **Local Wi-Fi Endpoint** | **ONLINE** | `http://10.133.221.7:5173` | Direct local network link for devices connected to the same Wi-Fi/Hotspot. |
+| **Local Wi-Fi Endpoint** | **ONLINE** | `http://10.0.72.145:5173` | Direct local network link for devices connected to the same Wi-Fi/Hotspot. |
 | **Backend API Root** | **ONLINE** | `http://localhost:8000` | FastAPI application with Uvicorn ASGI server. |
-| **API Health Check** | **HEALTHY** | `https://weblogs-processors-thermal-tail.trycloudflare.com/health` | Returns `{"status":"HEALTHY","database_connected":true,"gemini_api_configured":true}`. |
+| **API Health Check** | **HEALTHY** | `https://produced-formed-before-lopez.trycloudflare.com/health` | Returns `{"status":"HEALTHY","database_connected":true,"gemini_api_configured":true}`. |
 | **Interactive API Documentation** | **ONLINE** | `http://localhost:8000/docs` | Swagger UI with OpenAPI 3.1.0 specifications. |
 | **GitHub Repository** | **SYNCED** | `https://github.com/Prasad-9955/Personal-sports-digital-twin` | Tracked branch `main` with deployment configurations (`render.yaml`, `Dockerfile`, `vercel.json`, `_redirects`). |
 
@@ -51,7 +51,7 @@
    - Go to **Workers & Pages** $\to$ **Create application** $\to$ **Pages** $\to$ **Connect to Git**.
    - Select `Prasad-9955/Personal-sports-digital-twin`.
    - Set root directory: `web`, build command: `npm run build`, build output: `dist`.
-   - Add environment variable `VITE_API_BASE_URL` = `https://weblogs-processors-thermal-tail.trycloudflare.com`.
+   - Add environment variable `VITE_API_BASE_URL` = `https://produced-formed-before-lopez.trycloudflare.com`.
    - Click **Deploy**. This gives a permanent `https://personal-sports-digital-twin.pages.dev` URL.
 
 ---
@@ -61,6 +61,6 @@
 1. **Host Uptime Dependency**:
    - The FastAPI backend and PostgreSQL database run on the user's host laptop. When the laptop is powered off, in sleep mode, or disconnected from the internet, API calls will return a network timeout.
 2. **Tunnel Subdomain Lifetime**:
-   - The active public URL (`https://weblogs-processors-thermal-tail.trycloudflare.com`) remains active as long as the background tunnel process runs. If `cloudflared` is killed and restarted without a Cloudflare account token, a new random subdomain is generated.
+   - The active public URL (`https://produced-formed-before-lopez.trycloudflare.com`) remains active as long as the background tunnel process runs. If `cloudflared` is killed and restarted without a Cloudflare account token, a new random subdomain is generated.
 3. **Hardware Requirements for Video Ingestion**:
    - Processing a 15-second 1080p video clip through MediaPipe BlazePose consumes ~15–20 seconds of CPU computation on the host machine.
