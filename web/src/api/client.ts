@@ -14,7 +14,7 @@ import {
   SystemHealth,
 } from '../types';
 
-const rawBaseUrl = import.meta.env.VITE_API_BASE_URL ?? '';
+const rawBaseUrl = import.meta.env.VITE_API_BASE_URL || 'https://personal-sports-digital-twin.onrender.com';
 const API_BASE_URL = rawBaseUrl.replace(/\/+$/, '');
 
 export const apiClient = axios.create({
