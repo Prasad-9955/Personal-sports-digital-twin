@@ -14,7 +14,8 @@ import {
   SystemHealth,
 } from '../types';
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL ?? '';
+const rawBaseUrl = import.meta.env.VITE_API_BASE_URL ?? '';
+const API_BASE_URL = rawBaseUrl.replace(/\/+$/, '');
 
 export const apiClient = axios.create({
   baseURL: `${API_BASE_URL}/api/v1`,
