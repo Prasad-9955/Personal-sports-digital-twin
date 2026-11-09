@@ -17,6 +17,11 @@ import { MetricTrendsPage } from './pages/MetricTrendsPage';
 import { RecommendationsPage } from './pages/RecommendationsPage';
 import { ProfileSettingsPage } from './pages/ProfileSettingsPage';
 import { AthleteProgressPage } from './pages/AthleteProgressPage';
+import { TrainingLabPage } from './pages/TrainingLabPage';
+import { TrainingAcademyPage } from './pages/TrainingAcademyPage';
+import { CourseDetailPage } from './pages/CourseDetailPage';
+import { MyDevelopmentPage } from './pages/MyDevelopmentPage';
+import { TrainingTimelinePage } from './pages/TrainingTimelinePage';
 
 // Protected Route Guard
 const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
@@ -75,10 +80,50 @@ export const App: React.FC = () => {
                 }
               />
               <Route
+                path="/training-lab"
+                element={
+                  <ProtectedRoute>
+                    <TrainingLabPage />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/academy"
+                element={
+                  <ProtectedRoute>
+                    <TrainingAcademyPage />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/academy/courses/:courseIdOrSlug"
+                element={
+                  <ProtectedRoute>
+                    <CourseDetailPage />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/my-development"
+                element={
+                  <ProtectedRoute>
+                    <MyDevelopmentPage />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
                 path="/progress"
                 element={
                   <ProtectedRoute>
-                    <AthleteProgressPage />
+                    <MyDevelopmentPage />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/timeline"
+                element={
+                  <ProtectedRoute>
+                    <TrainingTimelinePage />
                   </ProtectedRoute>
                 }
               />

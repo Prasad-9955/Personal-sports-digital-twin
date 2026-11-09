@@ -10,6 +10,7 @@ from sqlalchemy import (
     ForeignKey,
     Text,
     Index,
+    UniqueConstraint,
 )
 from sqlalchemy.dialects.postgresql import UUID, JSONB
 from sqlalchemy.orm import relationship
@@ -52,6 +53,9 @@ class Athlete(Base):
     insights = relationship("Insight", back_populates="athlete", cascade="all, delete-orphan")
     recommendations = relationship("Recommendation", back_populates="athlete", cascade="all, delete-orphan")
     training_goals = relationship("TrainingGoal", back_populates="athlete", cascade="all, delete-orphan")
+    course_enrollments = relationship("CourseEnrollment", back_populates="athlete", cascade="all, delete-orphan")
+    sample_analysis_runs = relationship("SampleAnalysisRun", back_populates="athlete", cascade="all, delete-orphan")
+    milestones = relationship("TrainingMilestone", back_populates="athlete", cascade="all, delete-orphan")
 
 
 class Session(Base):
@@ -254,7 +258,225 @@ class TrainingGoal(Base):
     completed_at = Column(DateTime(timezone=True), nullable=True)
 
     athlete = relationship("Athlete", back_populates="training_goals")
+    progress_history = relationship("GoalProgressHistory", back_populates="goal", cascade="all, delete-orphan")
 
     __table_args__ = (
         Index("ix_training_goals_athlete_status", "athlete_id", "status"),
+    )
+
+
+class SampleDataset(Base):
+    """
+    Public biomechanical movement datasets (Health&Gait, Running Injury Clinic, etc.)
+    Provides reference metadata, licensing, and benchmark citation.
+    """
+    __tablename__ = "sample_datasets"
+
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    name = Column(String(150), unique=True, nullable=False)
+    provider = Column(String(150), nullable=False)
+    description = Column(Text, nullable=False)
+    source_url = Column(String(512), nullable=True)
+    licence_type = Column(String(100), nullable=False)
+    licence_url = Column(String(512), nullable=True)
+    created_at = Column(DateTime(timezone=True), default=utc_now, nullable=False)
+
+    videos = relationship("SampleVideo", back_populates="dataset", cascade="all, delete-orphan")
+
+
+class SampleVideo(Base):
+    """
+    Preloaded curated sample running and gait videos for demonstration and technique study.
+    Analysis runs on these videos are STRICTLY isolated and NEVER alter personal baselines or Twin states.
+    """
+    __tablename__ = "sample_videos"
+
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    dataset_id = Column(UUID(as_uuid=True), ForeignKey("sample_datasets.id", ondelete="SET NULL"), nullable=True)
+    title = Column(String(150), nullable=False)
+    category = Column(String(50), nullable=False, index=True)  # beginner_running, normal_running, fast_running, walking_gait, camera_angles
+    description = Column(Text, nullable=False)
+    difficulty_level = Column(String(30), nullable=False)  # BEGINNER, INTERMEDIATE, ADVANCED
+    duration_sec = Column(Float, nullable=False)
+    camera_angle = Column(String(50), nullable=False)  # sagittal_lateral, frontal_anterior, posterior, oblique
+    video_filename = Column(String(255), nullable=False)
+    video_url = Column(String(512), nullable=False)
+    thumbnail_url = Column(String(512), nullable=True)
+    fps = Column(Float, nullable=True)
+    resolution = Column(String(50), nullable=True)
+    benchmark_metrics = Column(JSONB, nullable=True)  # Ground-truth angles, cadence, symmetry
+    is_active = Column(Boolean, default=True, nullable=False)
+    created_at = Column(DateTime(timezone=True), default=utc_now, nullable=False)
+
+    dataset = relationship("SampleDataset", back_populates="videos")
+    analysis_runs = relationship("SampleAnalysisRun", back_populates="sample_video", cascade="all, delete-orphan")
+
+    __table_args__ = (
+        Index("ix_sample_videos_category_angle", "category", "camera_angle"),
+    )
+
+
+class SampleAnalysisRun(Base):
+    """
+    Records MediaPipe and OpenCV analysis executions performed on sample videos.
+    STRICT BARRIER: Clearly flagged as is_demo_data=True. Does NOT update the athlete's Personal Twin.
+    """
+    __tablename__ = "sample_analysis_runs"
+
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    sample_video_id = Column(UUID(as_uuid=True), ForeignKey("sample_videos.id", ondelete="CASCADE"), nullable=False, index=True)
+    athlete_id = Column(UUID(as_uuid=True), ForeignKey("athletes.id", ondelete="CASCADE"), nullable=False, index=True)
+    quality_score = Column(Float, nullable=False)
+    metrics_summary = Column(JSONB, nullable=False)  # Extracted trunk, knee flexion L/R, cadence, symmetry
+    pose_landmarks = Column(JSONB, nullable=True)
+    is_demo_data = Column(Boolean, default=True, nullable=False)
+    created_at = Column(DateTime(timezone=True), default=utc_now, nullable=False)
+
+    sample_video = relationship("SampleVideo", back_populates="analysis_runs")
+    athlete = relationship("Athlete", back_populates="sample_analysis_runs")
+
+
+class Course(Base):
+    """
+    Training Academy sports courses structured by curriculum levels.
+    """
+    __tablename__ = "courses"
+
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    slug = Column(String(100), unique=True, index=True, nullable=False)
+    title = Column(String(200), nullable=False)
+    description = Column(Text, nullable=False)
+    level = Column(String(30), nullable=False)  # BEGINNER, INTERMEDIATE, ADVANCED
+    estimated_duration_min = Column(Integer, nullable=False)
+    thumbnail_url = Column(String(512), nullable=True)
+    order_index = Column(Integer, default=0, nullable=False)
+    is_published = Column(Boolean, default=True, nullable=False)
+    created_at = Column(DateTime(timezone=True), default=utc_now, nullable=False)
+
+    modules = relationship("CourseModule", back_populates="course", cascade="all, delete-orphan", order_by="CourseModule.order_index")
+    enrollments = relationship("CourseEnrollment", back_populates="course", cascade="all, delete-orphan")
+
+
+class CourseModule(Base):
+    """
+    Subdivisions within a training academy course.
+    """
+    __tablename__ = "course_modules"
+
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    course_id = Column(UUID(as_uuid=True), ForeignKey("courses.id", ondelete="CASCADE"), nullable=False, index=True)
+    title = Column(String(200), nullable=False)
+    description = Column(Text, nullable=True)
+    order_index = Column(Integer, default=0, nullable=False)
+    created_at = Column(DateTime(timezone=True), default=utc_now, nullable=False)
+
+    course = relationship("Course", back_populates="modules")
+    lessons = relationship("CourseLesson", back_populates="module", cascade="all, delete-orphan", order_by="CourseLesson.order_index")
+
+
+class CourseLesson(Base):
+    """
+    Individual lesson units within a course module.
+    Types: VIDEO, TEXT, DEMO, PRACTICAL, QUIZ, ASSIGNMENT.
+    """
+    __tablename__ = "course_lessons"
+
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    module_id = Column(UUID(as_uuid=True), ForeignKey("course_modules.id", ondelete="CASCADE"), nullable=False, index=True)
+    title = Column(String(200), nullable=False)
+    lesson_type = Column(String(30), nullable=False)  # VIDEO, TEXT, DEMO, PRACTICAL, QUIZ, ASSIGNMENT
+    content_text = Column(Text, nullable=True)
+    video_url = Column(String(512), nullable=True)
+    duration_min = Column(Integer, default=10, nullable=False)
+    quiz_data = Column(JSONB, nullable=True)  # List of { question, options, correct_index, explanation }
+    assignment_instructions = Column(Text, nullable=True)
+    order_index = Column(Integer, default=0, nullable=False)
+    created_at = Column(DateTime(timezone=True), default=utc_now, nullable=False)
+
+    module = relationship("CourseModule", back_populates="lessons")
+    progress_records = relationship("LessonProgress", back_populates="lesson", cascade="all, delete-orphan")
+
+
+class CourseEnrollment(Base):
+    """
+    Athlete's active or completed enrolment in a course.
+    Tracks overall progress percentage and status.
+    """
+    __tablename__ = "course_enrollments"
+
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    athlete_id = Column(UUID(as_uuid=True), ForeignKey("athletes.id", ondelete="CASCADE"), nullable=False, index=True)
+    course_id = Column(UUID(as_uuid=True), ForeignKey("courses.id", ondelete="CASCADE"), nullable=False, index=True)
+    status = Column(String(30), default="ACTIVE", nullable=False)  # ACTIVE, COMPLETED, ARCHIVED
+    progress_pct = Column(Float, default=0.0, nullable=False)
+    enrolled_at = Column(DateTime(timezone=True), default=utc_now, nullable=False)
+    last_accessed_at = Column(DateTime(timezone=True), default=utc_now, nullable=False)
+    completed_at = Column(DateTime(timezone=True), nullable=True)
+
+    athlete = relationship("Athlete", back_populates="course_enrollments")
+    course = relationship("Course", back_populates="enrollments")
+    lesson_progress = relationship("LessonProgress", back_populates="enrollment", cascade="all, delete-orphan")
+
+    __table_args__ = (
+        UniqueConstraint("athlete_id", "course_id", name="uq_athlete_course_enrollment"),
+    )
+
+
+class LessonProgress(Base):
+    """
+    Granular completion tracking for an individual lesson within an enrolment.
+    """
+    __tablename__ = "lesson_progress"
+
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    enrollment_id = Column(UUID(as_uuid=True), ForeignKey("course_enrollments.id", ondelete="CASCADE"), nullable=False, index=True)
+    lesson_id = Column(UUID(as_uuid=True), ForeignKey("course_lessons.id", ondelete="CASCADE"), nullable=False, index=True)
+    status = Column(String(30), default="NOT_STARTED", nullable=False)  # NOT_STARTED, IN_PROGRESS, COMPLETED
+    quiz_score = Column(Float, nullable=True)  # 0.0 - 100.0 score if quiz
+    completed_at = Column(DateTime(timezone=True), nullable=True)
+    updated_at = Column(DateTime(timezone=True), default=utc_now, onupdate=utc_now, nullable=False)
+
+    enrollment = relationship("CourseEnrollment", back_populates="lesson_progress")
+    lesson = relationship("CourseLesson", back_populates="progress_records")
+
+    __table_args__ = (
+        UniqueConstraint("enrollment_id", "lesson_id", name="uq_enrollment_lesson_progress"),
+    )
+
+
+class GoalProgressHistory(Base):
+    """
+    Chronological progress snapshots recorded as an athlete logs training sessions.
+    """
+    __tablename__ = "goal_progress_history"
+
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    goal_id = Column(UUID(as_uuid=True), ForeignKey("training_goals.id", ondelete="CASCADE"), nullable=False, index=True)
+    observed_value = Column(Float, nullable=False)
+    progress_pct = Column(Float, nullable=False)
+    recorded_at = Column(DateTime(timezone=True), default=utc_now, nullable=False)
+
+    goal = relationship("TrainingGoal", back_populates="progress_history")
+
+
+class TrainingMilestone(Base):
+    """
+    Chronological timeline events marking athletic, academic, and biomechanical achievements.
+    Sources: COURSE_ENROLLED, LESSON_COMPLETED, QUIZ_PASSED, VIDEO_ANALYSIS, BASELINE_ESTABLISHED, GOAL_ACHIEVED.
+    """
+    __tablename__ = "training_milestones"
+
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    athlete_id = Column(UUID(as_uuid=True), ForeignKey("athletes.id", ondelete="CASCADE"), nullable=False, index=True)
+    event_type = Column(String(50), nullable=False)
+    title = Column(String(200), nullable=False)
+    description = Column(Text, nullable=False)
+    source_ref_id = Column(String(100), nullable=True)
+    metric_highlight = Column(String(150), nullable=True)
+    achieved_at = Column(DateTime(timezone=True), default=utc_now, nullable=False)
+
+    athlete = relationship("Athlete", back_populates="milestones")
+
+    __table_args__ = (
+        Index("ix_training_milestones_athlete_time", "athlete_id", "achieved_at"),
     )

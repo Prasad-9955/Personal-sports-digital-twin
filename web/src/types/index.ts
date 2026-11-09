@@ -273,3 +273,219 @@ export interface ProgressSummaryResponse {
   // Category 6: Longitudinal Milestones
   milestones: MilestoneEventItem[];
 }
+
+// ==========================================
+// FEATURE 1: Training Lab & Sample Video Types
+// ==========================================
+export interface SampleDatasetItem {
+  id: string;
+  name: string;
+  provider: string;
+  description: string;
+  source_url?: string | null;
+  licence_type: string;
+  licence_url?: string | null;
+  created_at: string;
+}
+
+export interface SampleVideoItem {
+  id: string;
+  dataset_id?: string | null;
+  dataset?: SampleDatasetItem | null;
+  title: string;
+  category: 'beginner_running' | 'normal_running' | 'fast_running' | 'walking_gait' | 'camera_angles';
+  description: string;
+  difficulty_level: 'BEGINNER' | 'INTERMEDIATE' | 'ADVANCED';
+  duration_sec: number;
+  camera_angle: 'sagittal_lateral' | 'frontal_anterior' | 'posterior' | 'oblique';
+  video_filename: string;
+  video_url: string;
+  thumbnail_url?: string | null;
+  fps?: number | null;
+  resolution?: string | null;
+  benchmark_metrics?: Record<string, any> | null;
+  is_active: boolean;
+  created_at: string;
+}
+
+export interface SampleAnalysisResponse {
+  id: string;
+  sample_video_id: string;
+  sample_video_title: string;
+  category: string;
+  camera_angle: string;
+  quality_score: number;
+  metrics_summary: Record<string, any>;
+  is_demo_data: boolean;
+  demonstration_notice: string;
+  created_at: string;
+}
+
+// ==========================================
+// FEATURE 2: Training Academy Types
+// ==========================================
+export interface LessonProgressItem {
+  lesson_id: string;
+  status: 'NOT_STARTED' | 'IN_PROGRESS' | 'COMPLETED';
+  quiz_score?: number | null;
+  completed_at?: string | null;
+}
+
+export interface QuizQuestion {
+  question: string;
+  options: string[];
+  correct_index: number;
+  explanation: string;
+}
+
+export interface CourseLessonItem {
+  id: string;
+  module_id: string;
+  title: string;
+  lesson_type: 'VIDEO' | 'TEXT' | 'DEMO' | 'PRACTICAL' | 'QUIZ' | 'ASSIGNMENT';
+  content_text?: string | null;
+  video_url?: string | null;
+  duration_min: number;
+  quiz_data?: QuizQuestion[] | null;
+  assignment_instructions?: string | null;
+  order_index: number;
+  user_progress?: LessonProgressItem | null;
+}
+
+export interface CourseModuleItem {
+  id: string;
+  course_id: string;
+  title: string;
+  description?: string | null;
+  order_index: number;
+  lessons: CourseLessonItem[];
+  completed_lessons_count: number;
+  total_lessons_count: number;
+}
+
+export interface CourseEnrollmentItem {
+  id: string;
+  course_id: string;
+  status: 'ACTIVE' | 'COMPLETED' | 'ARCHIVED';
+  progress_pct: number;
+  enrolled_at: string;
+  last_accessed_at: string;
+  completed_at?: string | null;
+}
+
+export interface CourseListItem {
+  id: string;
+  slug: string;
+  title: string;
+  description: string;
+  level: 'BEGINNER' | 'INTERMEDIATE' | 'ADVANCED';
+  estimated_duration_min: number;
+  thumbnail_url?: string | null;
+  modules_count: number;
+  lessons_count: number;
+  is_enrolled: boolean;
+  progress_pct: number;
+}
+
+export interface CourseDetailItem {
+  id: string;
+  slug: string;
+  title: string;
+  description: string;
+  level: 'BEGINNER' | 'INTERMEDIATE' | 'ADVANCED';
+  estimated_duration_min: number;
+  thumbnail_url?: string | null;
+  modules: CourseModuleItem[];
+  is_enrolled: boolean;
+  progress_pct: number;
+  enrollment?: CourseEnrollmentItem | null;
+}
+
+// ==========================================
+// FEATURE 3 & 4: My Development & Timeline Types
+// ==========================================
+export interface CourseProgressDonutData {
+  completed_lessons: number;
+  in_progress_lessons: number;
+  not_started_lessons: number;
+  total_lessons: number;
+  overall_course_completion_pct: number;
+}
+
+export interface TrainingGoalDonutData {
+  completed_goals: number;
+  in_progress_goals: number;
+  not_started_goals: number;
+  total_goals: number;
+  overall_goal_completion_pct: number;
+}
+
+export interface SkillCriterionData {
+  skill_name: string;
+  category: string;
+  score: number;
+  benchmark_target: number;
+  status: 'DEVELOPING' | 'COMPETENT' | 'PROFICIENT' | 'MASTERY';
+  assessment_method: 'MEASURED_BIOMECHANICS' | 'QUIZ_EVALUATION' | 'ADHERENCE_FREQUENCY';
+  measured_parameter: string;
+  observed_value: string;
+  explanation: string;
+}
+
+export interface BiomechanicalProgressData {
+  metric_name: string;
+  display_name: string;
+  unit: string;
+  initial_value: number;
+  current_value: number;
+  baseline_median: number;
+  delta_value: number;
+  delta_pct: number;
+  is_favorable: boolean;
+  quality_score: number;
+}
+
+export interface ActivityPeriodData {
+  period_label: string;
+  sessions_completed: number;
+  lessons_completed: number;
+  consistency_pct: number;
+}
+
+export interface EstimatedGoalData {
+  goal_id: string;
+  goal_title: string;
+  start_value: number;
+  target_value: number;
+  current_value: number;
+  progress_pct: number;
+  remaining_amount: number;
+  unit: string;
+  estimated_days?: number | null;
+  estimated_completion_date?: string | null;
+  has_enough_history: boolean;
+  estimation_note: string;
+}
+
+export interface TimelineEventData {
+  id: string;
+  event_type: string;
+  title: string;
+  description: string;
+  source_ref_id?: string | null;
+  metric_highlight?: string | null;
+  achieved_at: string;
+  date_formatted: string;
+}
+
+export interface MyDevelopmentData {
+  course_progress: CourseProgressDonutData;
+  goal_progress: TrainingGoalDonutData;
+  skills: SkillCriterionData[];
+  biomechanical_progress: BiomechanicalProgressData[];
+  weekly_activity: ActivityPeriodData[];
+  monthly_activity: ActivityPeriodData[];
+  estimated_goals: EstimatedGoalData[];
+  twin_version: number;
+  total_sessions_tracked: number;
+}

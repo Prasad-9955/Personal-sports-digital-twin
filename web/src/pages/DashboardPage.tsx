@@ -13,6 +13,8 @@ import {
   ChevronRight,
   Target,
   Award,
+  FlaskConical,
+  GraduationCap,
 } from 'lucide-react';
 import { useTwin } from '../context/TwinContext';
 import { useAuth } from '../context/AuthContext';
@@ -98,77 +100,77 @@ export const DashboardPage: React.FC = () => {
         isSeeding={isSeeding}
       />
 
-      {/* 2. Quick Action Grid (4 Key Functional Pillars) */}
+      {/* 2. Quick Action Grid (Core Platform Pillars) */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4">
         <Link
-          to="/upload"
+          to="/training-lab"
           className="p-4 rounded-2xl bg-cardDark border border-borderSubtle hover:border-accentCyan/40 hover:shadow-neon-cyan/20 transition-all flex flex-col justify-between group"
         >
           <div className="flex items-center justify-between mb-2">
             <div className="p-2 rounded-xl bg-accentCyan/10 text-accentCyan group-hover:scale-110 transition-transform">
-              <UploadCloud className="w-5 h-5" />
+              <FlaskConical className="w-5 h-5" />
             </div>
             <ArrowRight className="w-4 h-4 text-textDim group-hover:text-accentCyan group-hover:translate-x-0.5 transition-all" />
           </div>
           <div>
             <h4 className="text-sm font-bold text-textLight group-hover:text-accentCyan transition-colors">
-              Analyze Video
+              Training Lab
             </h4>
-            <span className="text-[11px] text-textMuted">MediaPipe & OpenCV</span>
+            <span className="text-[11px] text-textMuted">Sample Library & Analysis</span>
           </div>
         </Link>
 
         <Link
-          to="/progress"
+          to="/academy"
           className="p-4 rounded-2xl bg-cardDark border border-borderSubtle hover:border-electricTeal/40 hover:shadow-lg transition-all flex flex-col justify-between group"
         >
           <div className="flex items-center justify-between mb-2">
             <div className="p-2 rounded-xl bg-electricTeal/10 text-electricTeal group-hover:scale-110 transition-transform">
-              <Target className="w-5 h-5" />
+              <GraduationCap className="w-5 h-5" />
             </div>
             <ArrowRight className="w-4 h-4 text-textDim group-hover:text-electricTeal group-hover:translate-x-0.5 transition-all" />
           </div>
           <div>
             <h4 className="text-sm font-bold text-textLight group-hover:text-electricTeal transition-colors">
-              Progress & Skills
+              Training Academy
             </h4>
-            <span className="text-[11px] text-textMuted">Goals & Biomechanical Deltas</span>
+            <span className="text-[11px] text-textMuted">Structured Courses & Quizzes</span>
           </div>
         </Link>
 
         <Link
-          to="/insights"
+          to="/my-development"
           className="p-4 rounded-2xl bg-cardDark border border-borderSubtle hover:border-emeraldGreen/40 hover:shadow-lg transition-all flex flex-col justify-between group"
         >
           <div className="flex items-center justify-between mb-2">
             <div className="p-2 rounded-xl bg-emeraldGreen/10 text-emeraldGreen group-hover:scale-110 transition-transform">
-              <Sparkles className="w-5 h-5" />
+              <Award className="w-5 h-5" />
             </div>
             <ArrowRight className="w-4 h-4 text-textDim group-hover:text-emeraldGreen group-hover:translate-x-0.5 transition-all" />
           </div>
           <div>
             <h4 className="text-sm font-bold text-textLight group-hover:text-emeraldGreen transition-colors">
-              Gemini Coaching
+              My Development
             </h4>
-            <span className="text-[11px] text-textMuted">AI Grounded Drills</span>
+            <span className="text-[11px] text-textMuted">Progress, Goals & Deltas</span>
           </div>
         </Link>
 
         <Link
-          to="/trends"
+          to="/insights"
           className="p-4 rounded-2xl bg-cardDark border border-borderSubtle hover:border-warningAmber/40 hover:shadow-lg transition-all flex flex-col justify-between group"
         >
           <div className="flex items-center justify-between mb-2">
             <div className="p-2 rounded-xl bg-warningAmber/10 text-warningAmber group-hover:scale-110 transition-transform">
-              <TrendingUp className="w-5 h-5" />
+              <Sparkles className="w-5 h-5" />
             </div>
             <ArrowRight className="w-4 h-4 text-textDim group-hover:text-warningAmber group-hover:translate-x-0.5 transition-all" />
           </div>
           <div>
             <h4 className="text-sm font-bold text-textLight group-hover:text-warningAmber transition-colors">
-              Kinematic Trends
+              Gemini Coaching
             </h4>
-            <span className="text-[11px] text-textMuted">{anomalies.length} variations tracked</span>
+            <span className="text-[11px] text-textMuted">AI Grounded Drills</span>
           </div>
         </Link>
       </div>
@@ -177,23 +179,23 @@ export const DashboardPage: React.FC = () => {
       <div className="p-5 md:p-6 rounded-3xl bg-cardDark/80 border border-electricTeal/30 flex flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-xl">
         <div className="flex items-start sm:items-center gap-3.5">
           <div className="w-10 h-10 rounded-2xl bg-electricTeal/15 border border-electricTeal/30 flex items-center justify-center text-electricTeal shrink-0">
-            <Award className="w-5 h-5" />
+            <Target className="w-5 h-5" />
           </div>
           <div>
             <h3 className="text-sm md:text-base font-bold text-textLight">
-              Athlete Progress & Skill Development Matrix
+              Athlete Development & Skill Mastery Matrix
             </h3>
             <p className="text-xs text-textMuted mt-0.5">
-              Track 4 decoupled performance metrics: Goal Completion, 6 Skill Criteria, Biomechanical Deltas & Consistency.
+              Unified telemetry tracking course progress, measurable training targets, 6 skill criteria, and historical baseline deltas.
             </p>
           </div>
         </div>
 
         <Link
-          to="/progress"
+          to="/my-development"
           className="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-cardGlass border border-electricTeal/40 hover:border-electricTeal text-electricTeal text-xs font-bold uppercase tracking-wider hover:bg-electricTeal/10 transition-all shrink-0"
         >
-          <span>View Progress Matrix</span>
+          <span>View My Development</span>
           <ChevronRight className="w-3.5 h-3.5" />
         </Link>
       </div>

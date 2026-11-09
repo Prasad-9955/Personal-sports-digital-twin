@@ -15,6 +15,15 @@ import {
   TrainingGoalItem,
   TrainingGoalCreate,
   ProgressSummaryResponse,
+  SampleVideoItem,
+  SampleAnalysisResponse,
+  CourseListItem,
+  CourseDetailItem,
+  CourseLessonItem,
+  CourseEnrollmentItem,
+  LessonProgressItem,
+  MyDevelopmentData,
+  TimelineEventData,
 } from '../types';
 
 const rawBaseUrl = import.meta.env.VITE_API_BASE_URL || 'https://personal-sports-digital-twin.onrender.com';
@@ -185,6 +194,73 @@ export const api = {
     },
     getProgressSummary: async (): Promise<ProgressSummaryResponse> => {
       const res = await apiClient.get<ProgressSummaryResponse>('/goals/progress-summary');
+      return res.data;
+    },
+  },
+
+  // Feature 1: Training Lab & Sample Video Library
+  trainingLab: {
+    getSamples: async (category?: string, cameraAngle?: string): Promise<SampleVideoItem[]> => {
+      const res = await apiClient.get<SampleVideoItem[]>('/training-lab/samples', {
+        params: { category, camera_angle: cameraAngle },
+      });
+      return res.data;
+    },
+    getSample: async (sampleId: string): Promise<SampleVideoItem> => {
+      const res = await apiClient.get<SampleVideoItem>(`/training-lab/samples/${sampleId}`);
+      return res.data;
+    },
+    analyzeSample: async (sampleId: string): Promise<SampleAnalysisResponse> => {
+      const res = await apiClient.post<SampleAnalysisResponse>(
+        `/training-lab/samples/${sampleId}/analyze`,
+        {},
+        { timeout: 300000 }
+      );
+      return res.data;
+    },
+  },
+
+  // Feature 2: Training Academy (Courses, Modules, Lessons, Quizzes)
+  academy: {
+    getCourses: async (): Promise<CourseListItem[]> => {
+      const res = await apiClient.get<CourseListItem[]>('/academy/courses');
+      return res.data;
+    },
+    getCourse: async (courseIdOrSlug: string): Promise<CourseDetailItem> => {
+      const res = await apiClient.get<CourseDetailItem>(`/academy/courses/${courseIdOrSlug}`);
+      return res.data;
+    },
+    enroll: async (courseId: string): Promise<CourseEnrollmentItem> => {
+      const res = await apiClient.post<CourseEnrollmentItem>(`/academy/courses/${courseId}/enroll`);
+      return res.data;
+    },
+    getLesson: async (lessonId: string): Promise<CourseLessonItem> => {
+      const res = await apiClient.get<CourseLessonItem>(`/academy/lessons/${lessonId}`);
+      return res.data;
+    },
+    updateLessonProgress: async (
+      lessonId: string,
+      status: 'IN_PROGRESS' | 'COMPLETED',
+      quizAnswers?: number[]
+    ): Promise<LessonProgressItem> => {
+      const res = await apiClient.post<LessonProgressItem>(`/academy/lessons/${lessonId}/progress`, {
+        status,
+        quiz_answers: quizAnswers,
+      });
+      return res.data;
+    },
+  },
+
+  // Feature 3 & 4: My Development & Training Timeline
+  development: {
+    getSummary: async (): Promise<MyDevelopmentData> => {
+      const res = await apiClient.get<MyDevelopmentData>('/development/summary');
+      return res.data;
+    },
+    getTimeline: async (window = 'all'): Promise<TimelineEventData[]> => {
+      const res = await apiClient.get<TimelineEventData[]>('/development/timeline', {
+        params: { window },
+      });
       return res.data;
     },
   },

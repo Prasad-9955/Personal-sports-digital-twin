@@ -18,6 +18,9 @@ from app.routers import (
     recommendations,
     demo,
     goals,
+    training_lab,
+    academy,
+    development,
 )
 
 logger = logging.getLogger(__name__)
@@ -28,6 +31,16 @@ async def lifespan(app: FastAPI):
     try:
         Base.metadata.create_all(bind=engine)
         logger.info("Database tables initialized or confirmed.")
+        # Auto-seed sample datasets and academy courses
+        try:
+            from app.database import SessionLocal
+            from app.services.academy_seed_service import seed_sample_datasets_and_videos, seed_academy_courses_and_lessons
+            with SessionLocal() as db:
+                seed_sample_datasets_and_videos(db)
+                seed_academy_courses_and_lessons(db)
+                logger.info("Sample datasets and academy courses verified/seeded.")
+        except Exception as seed_err:
+            logger.warning(f"Seed step skipped: {seed_err}")
     except Exception as e:
         logger.warning(f"Could not auto-create tables on startup: {e}")
     yield
@@ -77,6 +90,9 @@ app.include_router(anomalies.router, prefix=api_prefix)
 app.include_router(recommendations.router, prefix=api_prefix)
 app.include_router(demo.router, prefix=api_prefix)
 app.include_router(goals.router, prefix=api_prefix)
+app.include_router(training_lab.router, prefix=api_prefix)
+app.include_router(academy.router, prefix=api_prefix)
+app.include_router(development.router, prefix=api_prefix)
 
 # Custom global exception handler for unexpected server errors
 @app.exception_handler(Exception)
