@@ -12,6 +12,9 @@ import {
   RecommendationItem,
   InsightItem,
   SystemHealth,
+  TrainingGoalItem,
+  TrainingGoalCreate,
+  ProgressSummaryResponse,
 } from '../types';
 
 const rawBaseUrl = import.meta.env.VITE_API_BASE_URL || 'https://personal-sports-digital-twin.onrender.com';
@@ -166,6 +169,22 @@ export const api = {
     },
     getInsights: async (): Promise<InsightItem[]> => {
       const res = await apiClient.get<InsightItem[]>('/insights');
+      return res.data;
+    },
+  },
+
+  // Training Goals & Athlete Skill Development
+  goals: {
+    list: async (): Promise<TrainingGoalItem[]> => {
+      const res = await apiClient.get<TrainingGoalItem[]>('/goals');
+      return res.data;
+    },
+    create: async (data: TrainingGoalCreate): Promise<TrainingGoalItem> => {
+      const res = await apiClient.post<TrainingGoalItem>('/goals', data);
+      return res.data;
+    },
+    getProgressSummary: async (): Promise<ProgressSummaryResponse> => {
+      const res = await apiClient.get<ProgressSummaryResponse>('/goals/progress-summary');
       return res.data;
     },
   },

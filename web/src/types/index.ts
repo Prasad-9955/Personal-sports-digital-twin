@@ -177,3 +177,99 @@ export interface SystemHealth {
   environment: string;
   gemini_api_configured: boolean;
 }
+
+export interface TrainingGoalItem {
+  id: string;
+  athlete_id: string;
+  title: string;
+  category: string;
+  metric_name: string;
+  target_direction: 'INCREASE' | 'DECREASE' | 'MAINTAIN';
+  baseline_value: number;
+  target_value: number;
+  current_value: number;
+  unit: string;
+  target_date?: string | null;
+  progress_pct: number;
+  status: 'NOT_STARTED' | 'IN_PROGRESS' | 'COMPLETED';
+  created_at: string;
+  completed_at?: string | null;
+}
+
+export interface TrainingGoalCreate {
+  title: string;
+  category?: string;
+  metric_name: string;
+  target_direction?: 'INCREASE' | 'DECREASE' | 'MAINTAIN';
+  baseline_value: number;
+  target_value: number;
+  current_value?: number;
+  unit: string;
+  target_date?: string | null;
+}
+
+export interface SkillScoreItem {
+  skill_name: string;
+  category: string;
+  current_score: number;
+  benchmark_target: number;
+  status: 'DEVELOPING' | 'COMPETENT' | 'PROFICIENT' | 'MASTERY';
+  criteria_explanation: string;
+  measured_parameter: string;
+  observed_value: string;
+}
+
+export interface MilestoneEventItem {
+  day_label: string;
+  title: string;
+  description: string;
+  date_str: string;
+  achieved: boolean;
+  session_id?: string | null;
+  metric_highlight?: string | null;
+}
+
+export interface BiomechanicalImprovementItem {
+  metric_name: string;
+  display_name: string;
+  unit: string;
+  initial_value: number;
+  current_value: number;
+  delta_value: number;
+  delta_pct: number;
+  is_favorable: boolean;
+  scientific_significance: string;
+}
+
+export interface ProgressSummaryResponse {
+  // Category 1: Training Completion
+  total_goals: number;
+  completed_goals: number;
+  in_progress_goals: number;
+  not_started_goals: number;
+  overall_goal_completion_pct: number;
+
+  // Category 2: Skill Development
+  overall_skill_development_pct: number;
+  skills: SkillScoreItem[];
+
+  // Category 3: Biomechanical Improvement
+  biomechanical_improvements: BiomechanicalImprovementItem[];
+  mean_improvement_pct: number;
+
+  // Category 4: Training Consistency
+  completed_sessions_count: number;
+  planned_sessions_count: number;
+  training_consistency_pct: number;
+  weekly_frequency_avg: number;
+  current_streak_days: number;
+
+  // Category 5: Estimated Time to Completion
+  estimated_days_to_goals?: number | null;
+  projected_completion_date?: string | null;
+  estimation_confidence: string;
+  estimation_note: string;
+
+  // Category 6: Longitudinal Milestones
+  milestones: MilestoneEventItem[];
+}

@@ -17,6 +17,7 @@ from app.routers import (
     anomalies,
     recommendations,
     demo,
+    goals,
 )
 
 logger = logging.getLogger(__name__)
@@ -75,6 +76,7 @@ app.include_router(trends.router, prefix=api_prefix)
 app.include_router(anomalies.router, prefix=api_prefix)
 app.include_router(recommendations.router, prefix=api_prefix)
 app.include_router(demo.router, prefix=api_prefix)
+app.include_router(goals.router, prefix=api_prefix)
 
 # Custom global exception handler for unexpected server errors
 @app.exception_handler(Exception)

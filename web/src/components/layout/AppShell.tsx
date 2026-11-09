@@ -15,6 +15,8 @@ import {
   ShieldCheck,
   ChevronRight,
   ExternalLink,
+  Target,
+  Award,
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { api } from '../../api/client';
@@ -59,10 +61,11 @@ export const AppShell: React.FC<AppShellProps> = ({ children }) => {
   const navLinks = [
     { to: '/dashboard', label: 'Twin Dashboard', icon: LayoutDashboard },
     { to: '/upload', label: 'Analyze Video', icon: UploadCloud },
-    { to: '/history', label: 'Session History', icon: History },
+    { to: '/progress', label: 'Progress & Skills', icon: Target },
     { to: '/digital-twin', label: 'Digital Twin State', icon: Cpu },
     { to: '/trends', label: 'Kinematic Trends', icon: TrendingUp },
     { to: '/insights', label: 'Gemini AI Coaching', icon: Sparkles },
+    { to: '/history', label: 'Session History', icon: History },
     { to: '/profile', label: 'Athlete Profile', icon: User },
   ];
 
@@ -289,7 +292,36 @@ export const AppShell: React.FC<AppShellProps> = ({ children }) => {
         </header>
 
         {/* Page Content Viewport */}
-        <main className="flex-1 p-4 md:p-8 max-w-7xl mx-auto w-full">{children}</main>
+        <main className="flex-1 p-4 md:p-8 max-w-7xl mx-auto w-full pb-24 md:pb-8">{children}</main>
+
+        {/* Mobile Persistent Bottom Quick Navigation Bar */}
+        <nav className="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-cardDark/95 backdrop-blur-lg border-t border-borderSubtle px-2 py-2 flex items-center justify-around shadow-2xl">
+          {[
+            { to: '/dashboard', label: 'Twin', icon: LayoutDashboard },
+            { to: '/upload', label: 'Analyze', icon: UploadCloud },
+            { to: '/progress', label: 'Progress', icon: Target },
+            { to: '/digital-twin', label: 'State', icon: Cpu },
+            { to: '/insights', label: 'AI Coach', icon: Sparkles },
+          ].map((item) => {
+            const Icon = item.icon;
+            return (
+              <NavLink
+                key={item.to}
+                to={item.to}
+                className={({ isActive }) =>
+                  `flex flex-col items-center justify-center py-1 px-2.5 rounded-xl text-[10px] font-bold tracking-tight transition-all ${
+                    isActive
+                      ? 'text-accentCyan bg-accentCyan/15'
+                      : 'text-textDim hover:text-textLight'
+                  }`
+                }
+              >
+                <Icon className="w-4 h-4 mb-0.5" />
+                <span>{item.label}</span>
+              </NavLink>
+            );
+          })}
+        </nav>
       </div>
     </div>
   );

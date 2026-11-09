@@ -51,6 +51,7 @@ class Athlete(Base):
     anomalies = relationship("AnomalyResult", back_populates="athlete", cascade="all, delete-orphan")
     insights = relationship("Insight", back_populates="athlete", cascade="all, delete-orphan")
     recommendations = relationship("Recommendation", back_populates="athlete", cascade="all, delete-orphan")
+    training_goals = relationship("TrainingGoal", back_populates="athlete", cascade="all, delete-orphan")
 
 
 class Session(Base):
@@ -227,3 +228,33 @@ class Recommendation(Base):
 
     athlete = relationship("Athlete", back_populates="recommendations")
     session = relationship("Session", back_populates="recommendations")
+
+
+class TrainingGoal(Base):
+    """
+    Measurable athletic and biomechanical training goal.
+    Calculates progress against longitudinal session observations and personal baselines.
+    """
+    __tablename__ = "training_goals"
+
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    athlete_id = Column(UUID(as_uuid=True), ForeignKey("athletes.id", ondelete="CASCADE"), nullable=False, index=True)
+    title = Column(String(150), nullable=False)
+    category = Column(String(50), default="technique", nullable=False)  # cadence, symmetry, trunk_angle, knee_flexion, consistency, volume
+    metric_name = Column(String(100), nullable=False)
+    target_direction = Column(String(20), default="INCREASE", nullable=False)  # INCREASE, DECREASE, MAINTAIN, RANGE
+    baseline_value = Column(Float, nullable=False)
+    target_value = Column(Float, nullable=False)
+    current_value = Column(Float, nullable=False)
+    unit = Column(String(30), nullable=False)
+    progress_pct = Column(Float, default=0.0, nullable=False)  # 0.0 - 100.0
+    status = Column(String(30), default="IN_PROGRESS", nullable=False)  # NOT_STARTED, IN_PROGRESS, COMPLETED
+    target_date = Column(DateTime(timezone=True), nullable=True)
+    created_at = Column(DateTime(timezone=True), default=utc_now, nullable=False)
+    completed_at = Column(DateTime(timezone=True), nullable=True)
+
+    athlete = relationship("Athlete", back_populates="training_goals")
+
+    __table_args__ = (
+        Index("ix_training_goals_athlete_status", "athlete_id", "status"),
+    )

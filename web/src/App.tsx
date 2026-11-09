@@ -16,6 +16,7 @@ import { DigitalTwinPage } from './pages/DigitalTwinPage';
 import { MetricTrendsPage } from './pages/MetricTrendsPage';
 import { RecommendationsPage } from './pages/RecommendationsPage';
 import { ProfileSettingsPage } from './pages/ProfileSettingsPage';
+import { AthleteProgressPage } from './pages/AthleteProgressPage';
 
 // Protected Route Guard
 const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
@@ -70,6 +71,14 @@ export const App: React.FC = () => {
                 element={
                   <ProtectedRoute>
                     <VideoUploadPage />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/progress"
+                element={
+                  <ProtectedRoute>
+                    <AthleteProgressPage />
                   </ProtectedRoute>
                 }
               />

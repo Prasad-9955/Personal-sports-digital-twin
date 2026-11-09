@@ -1,6 +1,7 @@
 import React from 'react';
 import { Cpu, Sparkles, Database, CheckCircle2, AlertCircle, RefreshCw, Layers } from 'lucide-react';
 import { TwinOverview } from '../../types';
+import heroImage from '../../assets/sports_telemetry_hero.jpg';
 
 interface TwinStatusCardProps {
   overview: TwinOverview | null;
@@ -23,10 +24,20 @@ export const TwinStatusCard: React.FC<TwinStatusCardProps> = ({
     : '--';
 
   return (
-    <div className="relative overflow-hidden rounded-3xl bg-hero-gradient border border-accentCyan/30 p-6 md:p-8 shadow-2xl">
+    <div className="relative overflow-hidden rounded-3xl bg-cardDark border border-accentCyan/30 p-6 md:p-8 shadow-2xl">
+      {/* High-Resolution Professional Sports Telemetry Hero Background */}
+      <div className="absolute inset-0 z-0 pointer-events-none">
+        <img
+          src={heroImage}
+          alt="Professional Track Biomechanical Telemetry"
+          className="w-full h-full object-cover object-center opacity-25 filter saturate-150"
+        />
+        <div className="absolute inset-0 bg-gradient-to-r from-surfaceDark via-surfaceDark/90 to-surfaceDark/70" />
+      </div>
+
       {/* Decorative background glow */}
-      <div className="absolute top-0 right-0 w-96 h-96 bg-accentCyan/10 rounded-full blur-3xl pointer-events-none -mr-20 -mt-20" />
-      <div className="absolute bottom-0 left-1/3 w-80 h-80 bg-electricTeal/10 rounded-full blur-3xl pointer-events-none -mb-20" />
+      <div className="absolute top-0 right-0 w-96 h-96 bg-accentCyan/15 rounded-full blur-3xl pointer-events-none -mr-20 -mt-20 z-0" />
+      <div className="absolute bottom-0 left-1/3 w-80 h-80 bg-electricTeal/15 rounded-full blur-3xl pointer-events-none -mb-20 z-0" />
 
       {/* Header Row */}
       <div className="relative flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">

@@ -11,6 +11,8 @@ import {
   RefreshCw,
   ArrowRight,
   ChevronRight,
+  Target,
+  Award,
 } from 'lucide-react';
 import { useTwin } from '../context/TwinContext';
 import { useAuth } from '../context/AuthContext';
@@ -96,53 +98,103 @@ export const DashboardPage: React.FC = () => {
         isSeeding={isSeeding}
       />
 
-      {/* 2. Quick Action Row */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 md:gap-4">
+      {/* 2. Quick Action Grid (4 Key Functional Pillars) */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4">
         <Link
           to="/upload"
-          className="p-4 rounded-2xl bg-cardDark border border-borderSubtle hover:border-accentCyan/40 hover:shadow-neon-cyan/20 transition-all flex items-center gap-3.5 group"
+          className="p-4 rounded-2xl bg-cardDark border border-borderSubtle hover:border-accentCyan/40 hover:shadow-neon-cyan/20 transition-all flex flex-col justify-between group"
         >
-          <div className="p-2.5 rounded-xl bg-accentCyan/10 text-accentCyan group-hover:scale-110 transition-transform">
-            <UploadCloud className="w-5 h-5" />
+          <div className="flex items-center justify-between mb-2">
+            <div className="p-2 rounded-xl bg-accentCyan/10 text-accentCyan group-hover:scale-110 transition-transform">
+              <UploadCloud className="w-5 h-5" />
+            </div>
+            <ArrowRight className="w-4 h-4 text-textDim group-hover:text-accentCyan group-hover:translate-x-0.5 transition-all" />
           </div>
           <div>
             <h4 className="text-sm font-bold text-textLight group-hover:text-accentCyan transition-colors">
-              Analyze Movement Video
+              Analyze Video
             </h4>
-            <span className="text-xs text-textMuted">Upload MP4 & run MediaPipe</span>
+            <span className="text-[11px] text-textMuted">MediaPipe & OpenCV</span>
+          </div>
+        </Link>
+
+        <Link
+          to="/progress"
+          className="p-4 rounded-2xl bg-cardDark border border-borderSubtle hover:border-electricTeal/40 hover:shadow-lg transition-all flex flex-col justify-between group"
+        >
+          <div className="flex items-center justify-between mb-2">
+            <div className="p-2 rounded-xl bg-electricTeal/10 text-electricTeal group-hover:scale-110 transition-transform">
+              <Target className="w-5 h-5" />
+            </div>
+            <ArrowRight className="w-4 h-4 text-textDim group-hover:text-electricTeal group-hover:translate-x-0.5 transition-all" />
+          </div>
+          <div>
+            <h4 className="text-sm font-bold text-textLight group-hover:text-electricTeal transition-colors">
+              Progress & Skills
+            </h4>
+            <span className="text-[11px] text-textMuted">Goals & Biomechanical Deltas</span>
           </div>
         </Link>
 
         <Link
           to="/insights"
-          className="p-4 rounded-2xl bg-cardDark border border-borderSubtle hover:border-electricTeal/40 hover:shadow-lg transition-all flex items-center gap-3.5 group"
+          className="p-4 rounded-2xl bg-cardDark border border-borderSubtle hover:border-emeraldGreen/40 hover:shadow-lg transition-all flex flex-col justify-between group"
         >
-          <div className="p-2.5 rounded-xl bg-electricTeal/10 text-electricTeal group-hover:scale-110 transition-transform">
-            <Sparkles className="w-5 h-5" />
+          <div className="flex items-center justify-between mb-2">
+            <div className="p-2 rounded-xl bg-emeraldGreen/10 text-emeraldGreen group-hover:scale-110 transition-transform">
+              <Sparkles className="w-5 h-5" />
+            </div>
+            <ArrowRight className="w-4 h-4 text-textDim group-hover:text-emeraldGreen group-hover:translate-x-0.5 transition-all" />
           </div>
           <div>
-            <h4 className="text-sm font-bold text-textLight group-hover:text-electricTeal transition-colors">
-              Gemini AI Coaching
+            <h4 className="text-sm font-bold text-textLight group-hover:text-emeraldGreen transition-colors">
+              Gemini Coaching
             </h4>
-            <span className="text-xs text-textMuted">Evidence-grounded drills</span>
+            <span className="text-[11px] text-textMuted">AI Grounded Drills</span>
           </div>
         </Link>
 
         <Link
           to="/trends"
-          className="p-4 rounded-2xl bg-cardDark border border-borderSubtle hover:border-warningAmber/40 hover:shadow-lg transition-all flex items-center gap-3.5 group"
+          className="p-4 rounded-2xl bg-cardDark border border-borderSubtle hover:border-warningAmber/40 hover:shadow-lg transition-all flex flex-col justify-between group"
         >
-          <div className="p-2.5 rounded-xl bg-warningAmber/10 text-warningAmber group-hover:scale-110 transition-transform">
-            <TrendingUp className="w-5 h-5" />
+          <div className="flex items-center justify-between mb-2">
+            <div className="p-2 rounded-xl bg-warningAmber/10 text-warningAmber group-hover:scale-110 transition-transform">
+              <TrendingUp className="w-5 h-5" />
+            </div>
+            <ArrowRight className="w-4 h-4 text-textDim group-hover:text-warningAmber group-hover:translate-x-0.5 transition-all" />
           </div>
           <div>
             <h4 className="text-sm font-bold text-textLight group-hover:text-warningAmber transition-colors">
-              Variations & Trends
+              Kinematic Trends
             </h4>
-            <span className="text-xs text-textMuted">
-              {anomalies.length} variations flagged
-            </span>
+            <span className="text-[11px] text-textMuted">{anomalies.length} variations tracked</span>
           </div>
+        </Link>
+      </div>
+
+      {/* Progress & Skills Telemetry Teaser Card */}
+      <div className="p-5 md:p-6 rounded-3xl bg-cardDark/80 border border-electricTeal/30 flex flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-xl">
+        <div className="flex items-start sm:items-center gap-3.5">
+          <div className="w-10 h-10 rounded-2xl bg-electricTeal/15 border border-electricTeal/30 flex items-center justify-center text-electricTeal shrink-0">
+            <Award className="w-5 h-5" />
+          </div>
+          <div>
+            <h3 className="text-sm md:text-base font-bold text-textLight">
+              Athlete Progress & Skill Development Matrix
+            </h3>
+            <p className="text-xs text-textMuted mt-0.5">
+              Track 4 decoupled performance metrics: Goal Completion, 6 Skill Criteria, Biomechanical Deltas & Consistency.
+            </p>
+          </div>
+        </div>
+
+        <Link
+          to="/progress"
+          className="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-cardGlass border border-electricTeal/40 hover:border-electricTeal text-electricTeal text-xs font-bold uppercase tracking-wider hover:bg-electricTeal/10 transition-all shrink-0"
+        >
+          <span>View Progress Matrix</span>
+          <ChevronRight className="w-3.5 h-3.5" />
         </Link>
       </div>
 
